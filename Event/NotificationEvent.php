@@ -28,7 +28,7 @@
 namespace Benkle\NotificationBundle\Event;
 
 use Symfony\Component\EventDispatcher\Event;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -79,10 +79,10 @@ class NotificationEvent extends Event
     /**
      * Dispatch event.
      *
-     * @param EventDispatcher $dispatcher
+     * @param EventDispatcherInterface $dispatcher
      * @return Event
      */
-    public function dispatchTo(EventDispatcher $dispatcher): Event
+    public function dispatchTo(EventDispatcherInterface $dispatcher): Event
     {
         return $dispatcher->dispatch(self::NAME, $this);
     }
