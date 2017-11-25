@@ -14,5 +14,10 @@
             "name": "Benjamin Kleiner",
             "email": "bizzl@users.sourceforge.net"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "Benkle\\NotificationBundle\\": ""
+        }
+    }
 }
