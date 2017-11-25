@@ -28,6 +28,7 @@
 namespace Benkle\NotificationBundle\Event;
 
 use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -36,6 +37,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class NotificationEvent extends Event
 {
+    const NAME = 'benkle.notification.event';
+
     /** @var  UserInterface */
     private $user;
 
@@ -54,6 +57,8 @@ class NotificationEvent extends Event
     }
 
     /**
+     * Get the user the notification should be send to.
+     *
      * @return UserInterface
      */
     public function getUser(): UserInterface
@@ -62,10 +67,23 @@ class NotificationEvent extends Event
     }
 
     /**
+     * Get the message of the notification.
+     *
      * @return string
      */
     public function getMessage(): string
     {
         return $this->message;
+    }
+
+    /**
+     * Dispatch event.
+     *
+     * @param EventDispatcher $dispatcher
+     * @return Event
+     */
+    public function dispatchTo(EventDispatcher $dispatcher): Event
+    {
+        return $dispatcher->dispatch(self::NAME, $this);
     }
 }
