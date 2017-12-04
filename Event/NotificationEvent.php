@@ -39,21 +39,32 @@ class NotificationEvent extends Event
 {
     const NAME = 'benkle.notification.event';
 
+    const PRIORITY_VERY_HIGH = 128;
+    const PRIORITY_HIGH = 64;
+    const PRIORITY_MIDDLE = 32;
+    const PRIORITY_LOW = 16;
+    const PRIORITY_VERY_LOW = 8;
+
     /** @var  UserInterface */
     private $user;
 
     /** @var  string */
     private $message;
 
+    /** @var  int */
+    private $priority;
+
     /**
      * NotificationEvent constructor.
      * @param UserInterface $user
      * @param string $message
+     * @param int $priority
      */
-    public function __construct(UserInterface $user, $message)
+    public function __construct(UserInterface $user, string $message, int $priority = self::PRIORITY_MIDDLE)
     {
         $this->user = $user;
         $this->message = $message;
+        $this->priority = $priority;
     }
 
     /**
@@ -74,6 +85,16 @@ class NotificationEvent extends Event
     public function getMessage(): string
     {
         return $this->message;
+    }
+
+    /**
+     * Get the message priority.
+     *
+     * @return int
+     */
+    public function getPriority(): int
+    {
+        return $this->priority;
     }
 
     /**
