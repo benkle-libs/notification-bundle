@@ -52,6 +52,7 @@ class NotificationController extends Controller
                     ->setKey($key)
                     ->setSecret($secret);
                 $subscriptionProvider->persist($subscription);
+                return $this->json(['success' => true]);
             } catch (\Throwable $e) {
                 return $this->json(
                     [

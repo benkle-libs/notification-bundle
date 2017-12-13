@@ -25,7 +25,7 @@
 
 let encode = (x) => btoa(String.fromCharCode.apply(null, new Uint8Array(x)));
 
-navigator.serviceWorker.register('service-worker.js')
+navigator.serviceWorker.register('bundles/benklenotification/service-worker.js')
     .then(function (registration) {
         return registration.pushManager.getSubscription()
             .then(function (subscription) {
@@ -38,16 +38,17 @@ navigator.serviceWorker.register('service-worker.js')
     let rawKey = subscription.getKey ? subscription.getKey('p256dh') : '';
     let key = rawKey ? encode(rawKey) : '';
     let rawSecret = subscription.getKey ? subscription.getKey('auth') : '';
-    let secret = rawAuthSecret ? encode(rawSecret) : '';
+    let secret = rawSecret ? encode(rawSecret) : '';
     return fetch('/notifications/register', {
         method: 'post',
+        credentials: 'include',
         headers: {
             'Content-type': 'application/json'
         },
         body: JSON.stringify({
             endpoint: subscription.endpoint,
             key: key,
-            secret: authSecret,
+            secret: secret,
         }),
     });
 });

@@ -1,0 +1,3 @@
+benkle_notifications_register:
+    path:     /notifications/register
+    defaults: { _controller: BenkleNotificationBundle:Notification:register }
