@@ -1,4 +1,3 @@
-<?php
 /*
  * Copyright (c) 2017 Benjamin Kleiner
  *
@@ -24,34 +23,31 @@
  * THE SOFTWARE.
  */
 
-namespace Benkle\NotificationBundle\DependencyInjection;
+let encode = (x) => btoa(String.fromCharCode.apply(null, new Uint8Array(x)));
 
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
-use Symfony\Component\Config\Definition\ConfigurationInterface;
-
-/**
- * This is the class that validates and merges configuration from your app/config files.
- *
- * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/configuration.html}
- */
-class Configuration implements ConfigurationInterface
-{
-    /**
-     * {@inheritdoc}
-     */
-    public function getConfigTreeBuilder()
-    {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('benkle_notification');
-
-        $rootNode
-            ->children()
-            ->arrayNode('subscriptions')
-            ->children()
-            ->scalarNode('provider')
-            ->end()
-            ->end();
-
-        return $treeBuilder;
-    }
-}
+navigator.serviceWorker.register('service-worker.js')
+    .then(function (registration) {
+        return registration.pushManager.getSubscription()
+            .then(function (subscription) {
+                if (subscription) {
+                    return subscription;
+                }
+                return registration.pushManager.subscribe({userVisibleOnly: true});
+            });
+    }).then(function (subscription) {
+    let rawKey = subscription.getKey ? subscription.getKey('p256dh') : '';
+    let key = rawKey ? encode(rawKey) : '';
+    let rawSecret = subscription.getKey ? subscription.getKey('auth') : '';
+    let secret = rawAuthSecret ? encode(rawSecret) : '';
+    return fetch('/notifications/register', {
+        method: 'post',
+        headers: {
+            'Content-type': 'application/json'
+        },
+        body: JSON.stringify({
+            endpoint: subscription.endpoint,
+            key: key,
+            secret: authSecret,
+        }),
+    });
+});

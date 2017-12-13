@@ -24,34 +24,38 @@
  * THE SOFTWARE.
  */
 
-namespace Benkle\NotificationBundle\DependencyInjection;
 
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
-use Symfony\Component\Config\Definition\ConfigurationInterface;
+namespace Benkle\NotificationBundle\Service;
+
+use Benkle\NotificationBundle\Entity\SubscriptionInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * This is the class that validates and merges configuration from your app/config files.
- *
- * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/configuration.html}
+ * Interface SubscriptionProviderInterface
+ * @package Benkle\NotificationBundle\Service
  */
-class Configuration implements ConfigurationInterface
+interface SubscriptionProviderInterface
 {
     /**
-     * {@inheritdoc}
+     * Create a new subscription entity.
+     *
+     * @return SubscriptionInterface
      */
-    public function getConfigTreeBuilder()
-    {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('benkle_notification');
+    public function create(): SubscriptionInterface;
 
-        $rootNode
-            ->children()
-            ->arrayNode('subscriptions')
-            ->children()
-            ->scalarNode('provider')
-            ->end()
-            ->end();
+    /**
+     * Persist a subscription entity.
+     *
+     * @param SubscriptionInterface $subscription
+     * @return SubscriptionProviderInterface
+     */
+    public function persist(SubscriptionInterface $subscription): SubscriptionProviderInterface;
 
-        return $treeBuilder;
-    }
+    /**
+     * Get all subscriptions for a user.
+     *
+     * @param UserInterface $user
+     * @return SubscriptionInterface[]
+     */
+    public function getSubscriptionForUser(UserInterface $user);
 }

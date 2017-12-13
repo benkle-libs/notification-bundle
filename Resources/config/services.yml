@@ -1,1 +1,5 @@
 services:
+    benkle.notifications.listeners.default:
+        class: Benkle\NotificationBundle\Listener\DefaultNotificationListener
+        tags:
+            - name: kernel.event_subscriber

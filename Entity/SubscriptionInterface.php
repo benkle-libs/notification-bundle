@@ -24,34 +24,58 @@
  * THE SOFTWARE.
  */
 
-namespace Benkle\NotificationBundle\DependencyInjection;
 
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
-use Symfony\Component\Config\Definition\ConfigurationInterface;
+namespace Benkle\NotificationBundle\Entity;
 
 /**
- * This is the class that validates and merges configuration from your app/config files.
+ * Interface SubscriptionInterface
  *
- * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/configuration.html}
+ * @package Benkle\NotificationBundle\Entity
  */
-class Configuration implements ConfigurationInterface
+interface SubscriptionInterface
 {
     /**
-     * {@inheritdoc}
+     * Get subscription endpoint.
+     *
+     * @return string
      */
-    public function getConfigTreeBuilder()
-    {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('benkle_notification');
+    public function getEndpoint(): string;
 
-        $rootNode
-            ->children()
-            ->arrayNode('subscriptions')
-            ->children()
-            ->scalarNode('provider')
-            ->end()
-            ->end();
+    /**
+     * Set subscription endpoint.
+     *
+     * @param string $endpoint
+     * @return SubscriptionInterface
+     */
+    public function setEndpoint(string $endpoint): SubscriptionInterface;
 
-        return $treeBuilder;
-    }
+    /**
+     * Get subscription key.
+     *
+     * @return string
+     */
+    public function getKey(): string;
+
+    /**
+     * Set subscription key.
+     *
+     * @param string $key
+     * @return SubscriptionInterface
+     */
+    public function setKey(string $key): SubscriptionInterface;
+
+    /**
+     * Get subscription secret.
+     *
+     * @return string
+     */
+    public function getSecret(): string;
+
+    /**
+     * Set subscription secret.
+     *
+     * @param string $secret
+     * @return SubscriptionInterface
+     */
+    public function setSecret(string $secret): SubscriptionInterface;
 }

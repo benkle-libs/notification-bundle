@@ -29,46 +29,56 @@ namespace Benkle\NotificationBundle\Listener;
 
 
 use Benkle\NotificationBundle\Event\NotificationEvent;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Benkle\NotificationBundle\Service\SubscriptionProviderInterface;
+use Minishlink\WebPush\WebPush;
 
 /**
- * Class AbstractNotificationListener
+ * Class DefaultNotificationListener
  * @package Benkle\NotificationBundle\Listener
  */
-abstract class AbstractNotificationListener implements EventSubscriberInterface
+class DefaultNotificationListener extends AbstractNotificationListener
 {
+    /** @var SubscriptionProviderInterface */
+    private $subscriptionProvider;
+
+    /**
+     * Set the subscription provider.
+     *
+     * @param SubscriptionProviderInterface $subscriptionProvider
+     * @return $this
+     */
+    public function setSubscriptionProvider(SubscriptionProviderInterface $subscriptionProvider)
+    {
+        $this->subscriptionProvider = $subscriptionProvider;
+        return $this;
+    }
+
     /**
      * Handle a notification event.
      *
      * @param NotificationEvent $event
+     * @throws \ErrorException
      */
-    public abstract function handleNotificationEvent(NotificationEvent $event);
-
-    /**
-     * Returns an array of event names this subscriber wants to listen to.
-     *
-     * The array keys are event names and the value can be:
-     *
-     *  * The method name to call (priority defaults to 0)
-     *  * An array composed of the method name to call and the priority
-     *  * An array of arrays composed of the method names to call and respective
-     *    priorities, or 0 if unset
-     *
-     * For instance:
-     *
-     *  * array('eventName' => 'methodName')
-     *  * array('eventName' => array('methodName', $priority))
-     *  * array('eventName' => array(array('methodName1', $priority), array('methodName2')))
-     *
-     * @return array The event names to listen to
-     */
-    public static function getSubscribedEvents()
+    public function handleNotificationEvent(NotificationEvent $event)
     {
-        return [NotificationEvent::NAME => ['handleNotificationEvent', self::getPriority()]];
+        if (isset($this->subscriptionProvider)) {
+            $webPush = new WebPush();
+            foreach ($this->subscriptionProvider->getSubscriptionForUser($event->getUser()) as $subscription) {
+                $webPush->sendNotification(
+                    $subscription->getEndpoint(),
+                    $event->getMessage(),
+                    $subscription->getKey(),
+                    $subscription->getSecret()
+                );
+            }
+            $webPush->flush();
+        }
     }
 
     public static function getPriority(): int
     {
-        return 0;
+        return -1024;
     }
+
+
 }

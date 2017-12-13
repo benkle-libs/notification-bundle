@@ -26,10 +26,11 @@
 
 namespace Benkle\NotificationBundle\DependencyInjection;
 
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 /**
  * This is the class that loads and manages your bundle configuration.
@@ -48,5 +49,14 @@ class BenkleNotificationExtension extends Extension
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
+
+        $providerServiceName = $config['subscriptions']['provider'];
+        if ($providerServiceName) {
+            $providerServiceName = ltrim($providerServiceName, '@');
+            $providerService = new Reference($providerServiceName);
+            $defaultListener = $container->getDefinition('benkle.notifications.listeners.default');
+            $defaultListener->addMethodCall('setSubscriptionProvider', [$providerService]);
+            $container->setAlias('benkle.notifications.subscriptions', $providerServiceName);
+        }
     }
 }
