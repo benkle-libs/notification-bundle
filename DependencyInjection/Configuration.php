@@ -26,6 +26,8 @@
 
 namespace Benkle\NotificationBundle\DependencyInjection;
 
+use Benkle\NotificationBundle\Event\NotificationEvent;
+use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -48,10 +50,60 @@ class Configuration implements ConfigurationInterface
             ->children()
             ->arrayNode('subscriptions')
             ->children()
-            ->scalarNode('provider')
-            ->end()
-            ->end();
+            ->scalarNode('provider');
+
+        $this->buildVapidConfig($rootNode->children());
+        $this->buildDefaultConfig($rootNode->children());
 
         return $treeBuilder;
+    }
+
+    /**
+     * @param NodeBuilder $nodeBuilder
+     */
+    private function buildVapidConfig(NodeBuilder $nodeBuilder)
+    {
+        $nodeBuilder
+            ->arrayNode('vapid')
+            ->children()
+            ->scalarNode('subject')
+            ->isRequired()
+            ->end()
+            ->scalarNode('publicKey')
+            ->defaultNull()
+            ->end()
+            ->scalarNode('privateKey')
+            ->defaultNull()
+            ->end()
+            ->scalarNode('pemFile')
+            ->defaultNull()
+            ->end()
+            ->scalarNode('pem')
+            ->defaultNull()
+            ->end()
+            ->end();
+    }
+
+    /**
+     * @param NodeBuilder $nodeBuilder
+     */
+    private function buildDefaultConfig(NodeBuilder $nodeBuilder)
+    {
+        $nodeBuilder
+            ->arrayNode('defaults')
+            ->children()
+            ->scalarNode('ttl')
+            ->defaultValue(4 * 7 * 24 * 3600)
+            ->end()
+            ->scalarNode('urgency')
+            ->defaultValue(NotificationEvent::URGENCY_NORMAL)
+            ->end()
+            ->scalarNode('topic')
+            ->defaultNull()
+            ->end()
+            ->scalarNode('batchSize')
+            ->defaultValue(1000)
+            ->end()
+            ->end();
     }
 }

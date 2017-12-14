@@ -26,6 +26,7 @@
 
 namespace Benkle\NotificationBundle\DependencyInjection;
 
+use Minishlink\WebPush\VAPID;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
@@ -47,7 +48,7 @@ class BenkleNotificationExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yml');
 
         $providerServiceName = $config['subscriptions']['provider'];
@@ -58,5 +59,23 @@ class BenkleNotificationExtension extends Extension
             $defaultListener->addMethodCall('setSubscriptionProvider', [$providerService]);
             $container->setAlias('benkle.notifications.subscriptions', $providerServiceName);
         }
+
+        $vapid = $config['vapid'] ?? [];
+        if ($vapid) {
+            $vapid = VAPID::validate($vapid);
+            $vapid['publicKey'] = base64_encode($vapid['publicKey']);
+            $vapid['privateKey'] = base64_encode($vapid['privateKey']);
+            $container->setParameter('benkle.notifications.publicKey', $vapid['publicKey']);
+        }
+
+        $defaults = $config['defaults'] ?? [];
+        if (isset($defaults['ttl'])) {
+            $defaults['TTL'] = $defaults['ttl'];
+            unset($defaults['ttl']);
+        }
+        $container
+            ->getDefinition('benkle.notifications.pushfactory')
+            ->setArgument(0, $vapid)
+            ->setArgument(1, $defaults);
     }
 }

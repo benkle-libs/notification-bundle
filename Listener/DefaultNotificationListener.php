@@ -29,8 +29,8 @@ namespace Benkle\NotificationBundle\Listener;
 
 
 use Benkle\NotificationBundle\Event\NotificationEvent;
+use Benkle\NotificationBundle\Service\PushFactory;
 use Benkle\NotificationBundle\Service\SubscriptionProviderInterface;
-use Minishlink\WebPush\WebPush;
 
 /**
  * Class DefaultNotificationListener
@@ -40,6 +40,19 @@ class DefaultNotificationListener extends AbstractNotificationListener
 {
     /** @var SubscriptionProviderInterface */
     private $subscriptionProvider;
+
+    /** @var PushFactory */
+    private $pushFactory;
+
+    /**
+     * DefaultNotificationListener constructor.
+     *
+     * @param PushFactory $pushFactory
+     */
+    public function __construct(PushFactory $pushFactory)
+    {
+        $this->pushFactory = $pushFactory;
+    }
 
     /**
      * Set the subscription provider.
@@ -61,14 +74,16 @@ class DefaultNotificationListener extends AbstractNotificationListener
      */
     public function handleNotificationEvent(NotificationEvent $event)
     {
-        if (isset($this->subscriptionProvider)) {
-            $webPush = new WebPush();
+        if (isset($this->subscriptionProvider) && $event->isSendable()) {
+            $webPush = $this->pushFactory->getPush();
             foreach ($this->subscriptionProvider->getSubscriptionForUser($event->getUser()) as $subscription) {
                 $webPush->sendNotification(
                     $subscription->getEndpoint(),
-                    $event->getMessage(),
+                    json_encode($event->getPayload()),
                     $subscription->getKey(),
-                    $subscription->getSecret()
+                    $subscription->getSecret(),
+                    false,
+                    $event->getOptions()
                 );
             }
             $webPush->flush();

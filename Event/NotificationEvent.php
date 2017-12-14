@@ -39,36 +39,31 @@ class NotificationEvent extends Event
 {
     const NAME = 'benkle.notification.event';
 
-    const PRIORITY_VERY_HIGH = 128;
-    const PRIORITY_HIGH = 64;
-    const PRIORITY_MIDDLE = 32;
-    const PRIORITY_LOW = 16;
-    const PRIORITY_VERY_LOW = 8;
+    const URGENCY_HIGH     = 'high';
+    const URGENCY_NORMAL   = 'normal';
+    const URGENCY_LOW      = 'low';
+    const URGENCY_VERY_LOW = 'very-low';
 
     /** @var  UserInterface */
     private $user;
 
+    /** @var  mixed */
+    private $payload;
+
     /** @var  string */
-    private $message;
+    private $urgency = self::URGENCY_NORMAL;
 
-    /** @var  int */
-    private $priority;
+    /** @var int */
+    private $ttl = null;
 
-    /**
-     * NotificationEvent constructor.
-     * @param UserInterface $user
-     * @param string $message
-     * @param int $priority
-     */
-    public function __construct(UserInterface $user, string $message, int $priority = self::PRIORITY_MIDDLE)
-    {
-        $this->user = $user;
-        $this->message = $message;
-        $this->priority = $priority;
-    }
+    /** @var string */
+    private $topic = null;
+
+    /** @var bool */
+    private $sendable = true;
 
     /**
-     * Get the user the notification should be send to.
+     * Get the user associated with this notification.
      *
      * @return UserInterface
      */
@@ -78,23 +73,143 @@ class NotificationEvent extends Event
     }
 
     /**
-     * Get the message of the notification.
+     * Get the sendability of the notification.
      *
-     * @return string
+     * @return bool
      */
-    public function getMessage(): string
+    public function isSendable(): bool
     {
-        return $this->message;
+        return $this->sendable;
     }
 
     /**
-     * Get the message priority.
+     * Set the sendability of the notification.
+     * You can use this to make your application less verbose to the user
+     * while still being able to log and debug.
+     *
+     * @param bool $sendable
+     * @return $this
+     */
+    public function setSendable(bool $sendable)
+    {
+        $this->sendable = $sendable;
+        return $this;
+    }
+
+    /**
+     * Get the notification's payload.
+     *
+     * @return mixed
+     */
+    public function getPayload()
+    {
+        return $this->payload;
+    }
+
+    /**
+     * Set the notification's payload.
+     * Best to use something that can be serialized to JSON.
+     *
+     * @param mixed $payload
+     * @return $this
+     */
+    public function setPayload($payload)
+    {
+        $this->payload = $payload;
+        return $this;
+    }
+
+    /**
+     * Get the notification's urgency.
+     *
+     * @return string
+     */
+    public function getUrgency(): string
+    {
+        return $this->urgency;
+    }
+
+    /**
+     * Set the notification's urgency.
+     *
+     * @param string $urgency
+     * @return $this
+     */
+    public function setUrgency(string $urgency)
+    {
+        $this->urgency = $urgency;
+        return $this;
+    }
+
+    /**
+     * Set the notification's time to live.
      *
      * @return int
      */
-    public function getPriority(): int
+    public function getTTL(): int
     {
-        return $this->priority;
+        return $this->ttl;
+    }
+
+    /**
+     * Set the notification's time to live.
+     *
+     * @param int $ttl
+     * @return $this
+     */
+    public function setTTL(int $ttl)
+    {
+        $this->ttl = $ttl;
+        return $this;
+    }
+
+    /**
+     * Get the notification's topic.
+     *
+     * @return string
+     */
+    public function getTopic(): string
+    {
+        return $this->topic;
+    }
+
+    /**
+     * Set the notification's topic.
+     *
+     * @param string $topic
+     * @return $this
+     */
+    public function setTopic(string $topic)
+    {
+        $this->topic = $topic;
+        return $this;
+    }
+
+    /**
+     * Get the notification options for use with web-push.
+     *
+     * @return array
+     */
+    public function getOptions(): array
+    {
+        $result = [
+            'TTL'     => $this->ttl,
+            'urgency' => $this->urgency,
+            'topic'   => $this->topic,
+        ];
+        return array_filter($result);
+    }
+
+    /**
+     * NotificationEvent constructor.
+     *
+     * @param UserInterface $user
+     * @param mixed $payload
+     */
+    public function __construct(UserInterface $user, $payload = [])
+    {
+        $this->user = $user;
+        $this->payload = $payload;
     }
 
     /**

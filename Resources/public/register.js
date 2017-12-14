@@ -23,32 +23,55 @@
  * THE SOFTWARE.
  */
 
-let encode = (x) => btoa(String.fromCharCode.apply(null, new Uint8Array(x)));
+(function () {
+    let encode = (x) => btoa(String.fromCharCode.apply(null, new Uint8Array(x)));
 
-navigator.serviceWorker.register('bundles/benklenotification/service-worker.js')
-    .then(function (registration) {
-        return registration.pushManager.getSubscription()
-            .then(function (subscription) {
-                if (subscription) {
-                    return subscription;
-                }
-                return registration.pushManager.subscribe({userVisibleOnly: true});
-            });
-    }).then(function (subscription) {
-    let rawKey = subscription.getKey ? subscription.getKey('p256dh') : '';
-    let key = rawKey ? encode(rawKey) : '';
-    let rawSecret = subscription.getKey ? subscription.getKey('auth') : '';
-    let secret = rawSecret ? encode(rawSecret) : '';
-    return fetch('/notifications/register', {
-        method: 'post',
-        credentials: 'include',
-        headers: {
-            'Content-type': 'application/json'
-        },
-        body: JSON.stringify({
-            endpoint: subscription.endpoint,
-            key: key,
-            secret: secret,
-        }),
+    let urlBase64ToUint8Array = (base64String) => {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/-/g, '+')
+            .replace(/_/g, '/');
+
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    };
+
+    let options = {userVisibleOnly: true};
+    let publicKeyTag = document.querySelector('meta[name="x-vapid-public-key"]');
+    if (publicKeyTag) {
+        options['applicationServerKey'] = urlBase64ToUint8Array(publicKeyTag.attributes.getNamedItem('content').value);
+    }
+
+    navigator.serviceWorker.register('bundles/benklenotification/service-worker.js')
+        .then(function (registration) {
+            return registration.pushManager.getSubscription()
+                .then(function (subscription) {
+                    if (subscription) {
+                        return subscription;
+                    }
+                    return registration.pushManager.subscribe(options);
+                });
+        }).then(function (subscription) {
+        let rawKey = subscription.getKey ? subscription.getKey('p256dh') : '';
+        let key = rawKey ? encode(rawKey) : '';
+        let rawSecret = subscription.getKey ? subscription.getKey('auth') : '';
+        let secret = rawSecret ? encode(rawSecret) : '';
+        return fetch('/notifications/register', {
+            method: 'post',
+            credentials: 'include',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                endpoint: subscription.endpoint,
+                key: key,
+                secret: secret,
+            }),
+        });
     });
-});
+})();

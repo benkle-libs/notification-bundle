@@ -1,5 +1,18 @@
 services:
     benkle.notifications.listeners.default:
         class: Benkle\NotificationBundle\Listener\DefaultNotificationListener
+        arguments:
+            - '@benkle.notifications.pushfactory'
         tags:
             - name: kernel.event_subscriber
+
+    benkle.notifications.pushfactory:
+        class: Benkle\NotificationBundle\Service\PushFactory
+        arguments:
+            - []
+            - []
+
+    benkle.notifications.twig.extension:
+        class: Benkle\NotificationBundle\Twig\Extension
+        tags:
+            - name: twig.extension
