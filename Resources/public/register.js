@@ -47,31 +47,30 @@
         options['applicationServerKey'] = urlBase64ToUint8Array(publicKeyTag.attributes.getNamedItem('content').value);
     }
 
+    let pushManager = null;
+
     navigator.serviceWorker.register('bundles/benklenotification/service-worker.js')
-        .then(function (registration) {
-            return registration.pushManager.getSubscription()
-                .then(function (subscription) {
-                    if (subscription) {
-                        return subscription;
-                    }
-                    return registration.pushManager.subscribe(options);
-                });
-        }).then(function (subscription) {
-        let rawKey = subscription.getKey ? subscription.getKey('p256dh') : '';
-        let key = rawKey ? encode(rawKey) : '';
-        let rawSecret = subscription.getKey ? subscription.getKey('auth') : '';
-        let secret = rawSecret ? encode(rawSecret) : '';
-        return fetch('/notifications/register', {
-            method: 'post',
-            credentials: 'include',
-            headers: {
-                'Content-type': 'application/json'
-            },
-            body: JSON.stringify({
-                endpoint: subscription.endpoint,
-                key: key,
-                secret: secret,
-            }),
+        .then((registration) => {
+            pushManager = registration.pushManager;
+            return registration.pushManager.getSubscription();
+        })
+        .then((subscription) => subscription ? subscription : pushManager.subscribe(options))
+        .then(function (subscription) {
+            let rawKey = subscription.getKey ? subscription.getKey('p256dh') : '';
+            let key = rawKey ? encode(rawKey) : '';
+            let rawSecret = subscription.getKey ? subscription.getKey('auth') : '';
+            let secret = rawSecret ? encode(rawSecret) : '';
+            return fetch('/notifications/register', {
+                method: 'post',
+                credentials: 'include',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    endpoint: subscription.endpoint,
+                    key: key,
+                    secret: secret,
+                }),
+            });
         });
-    });
 })();

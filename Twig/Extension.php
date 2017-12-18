@@ -33,13 +33,26 @@ namespace Benkle\NotificationBundle\Twig;
  */
 class Extension extends \Twig_Extension implements \Twig_Extension_GlobalsInterface
 {
+    /** @var string */
+    private $publicKey;
+
+    /**
+     * Extension constructor.
+     * @param string $publicKey
+     */
+    public function __construct(string $publicKey)
+    {
+        $this->publicKey = $publicKey;
+    }
+
+
     /**
      * @return array
      */
     public function getGlobals()
     {
         return [
-            'benkle_notifications_public_key' => 'noop',
+            'benkle_notifications_public_key' => $this->publicKey,
         ];
     }
 }

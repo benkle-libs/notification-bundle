@@ -86,7 +86,8 @@ class DefaultNotificationListener extends AbstractNotificationListener
                     $event->getOptions()
                 );
             }
-            $webPush->flush();
+            $results = $webPush->flush();
+            // TODO Log results
         }
     }
 
@@ -94,6 +95,4 @@ class DefaultNotificationListener extends AbstractNotificationListener
     {
         return -1024;
     }
-
-
 }

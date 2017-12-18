@@ -24,6 +24,7 @@
  */
 
 self.addEventListener('push', (event) => {
+    console.log(event);
     let payload = event.data ? event.data.json() : {};
     let title = payload.title || false;
     let message = payload.message || '';

@@ -44,10 +44,10 @@ class PushFactory
     /**
      * PushFactory constructor.
      *
-     * @param array $defaults
      * @param array $vapid
+     * @param array $defaults
      */
-    public function __construct(array $defaults, array $vapid)
+    public function __construct(array $vapid, array $defaults)
     {
         $this->defaults = array_filter($defaults);
         $vapid = array_filter($vapid);

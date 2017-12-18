@@ -60,12 +60,15 @@ class BenkleNotificationExtension extends Extension
             $container->setAlias('benkle.notifications.subscriptions', $providerServiceName);
         }
 
-        $vapid = $config['vapid'] ?? [];
-        if ($vapid) {
+        $vapid = array_filter($config['vapid'] ?? []);
+        if (!empty($vapid)) {
             $vapid = VAPID::validate($vapid);
             $vapid['publicKey'] = base64_encode($vapid['publicKey']);
             $vapid['privateKey'] = base64_encode($vapid['privateKey']);
             $container->setParameter('benkle.notifications.publicKey', $vapid['publicKey']);
+            $container
+                ->getDefinition('benkle.notifications.twig.extension')
+                ->setArgument(0, $vapid['publicKey']);
         }
 
         $defaults = $config['defaults'] ?? [];

@@ -16,3 +16,5 @@ services:
         class: Benkle\NotificationBundle\Twig\Extension
         tags:
             - name: twig.extension
+        arguments:
+            - ''
