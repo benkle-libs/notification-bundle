@@ -54,8 +54,14 @@
             pushManager = registration.pushManager;
             return registration.pushManager.getSubscription();
         })
-        .then((subscription) => subscription ? subscription : pushManager.subscribe(options))
-        .then(function (subscription) {
+        .then((subscription) => {
+            if (subscription) {
+                throw 'Already subscribed';
+            } else {
+                return pushManager.subscribe(options);
+            }
+        })
+        .then((subscription) => {
             let rawKey = subscription.getKey ? subscription.getKey('p256dh') : '';
             let key = rawKey ? encode(rawKey) : '';
             let rawSecret = subscription.getKey ? subscription.getKey('auth') : '';
@@ -72,5 +78,6 @@
                     secret: secret,
                 }),
             });
-        });
+        })
+        .catch(console.log);
 })();
