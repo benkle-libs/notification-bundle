@@ -24,15 +24,9 @@
  */
 
 self.addEventListener('push', (event) => {
-    console.log(event);
     let payload = event.data ? event.data.json() : {};
-    let title = payload.title || false;
-    let message = payload.message || '';
+    let title = payload ? payload.title : '';
     if (title) {
-        event.waitUntil(
-            self.registration.showNotification(event.title, {
-                body: message,
-            })
-        );
+        event.waitUntil(self.registration.showNotification(title, payload));
     }
 });

@@ -27,6 +27,7 @@
 
 namespace Benkle\NotificationBundle\Event;
 
+use Benkle\NotificationBundle\Util\Payload;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -47,7 +48,7 @@ class NotificationEvent extends Event
     /** @var  UserInterface */
     private $user;
 
-    /** @var  mixed */
+    /** @var  mixed|Payload */
     private $payload;
 
     /** @var  string */
@@ -99,7 +100,7 @@ class NotificationEvent extends Event
     /**
      * Get the notification's payload.
      *
-     * @return mixed
+     * @return Payload|mixed
      */
     public function getPayload()
     {
@@ -110,7 +111,7 @@ class NotificationEvent extends Event
      * Set the notification's payload.
      * Best to use something that can be serialized to JSON.
      *
-     * @param mixed $payload
+     * @param Payload|mixed $payload
      * @return $this
      */
     public function setPayload($payload)
@@ -206,10 +207,10 @@ class NotificationEvent extends Event
      * @param UserInterface $user
      * @param mixed $payload
      */
-    public function __construct(UserInterface $user, $payload = [])
+    public function __construct(UserInterface $user, $payload = null)
     {
         $this->user = $user;
-        $this->payload = $payload;
+        $this->payload = $payload ?: new Payload();
     }
 
     /**

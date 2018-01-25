@@ -56,7 +56,7 @@
         })
         .then((subscription) => {
             if (subscription) {
-                throw 'Already subscribed';
+                throw subscription;
             } else {
                 return pushManager.subscribe(options);
             }
@@ -79,5 +79,7 @@
                 }),
             });
         })
-        .catch(console.log);
+        .catch((subscription) => {
+            subscription.update();
+        });
 })();
